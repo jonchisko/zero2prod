@@ -1,12 +1,13 @@
-const SPAWN_APP_ERR: &'static str = "Failed to spawn our app.";
+use std::net::TcpListener;
+
 const RESPONSE_ERR: &'static str = "Failed to execute request.";
 
 const EXPECTED_HEALTH_CHECK_LOCATION: &'static str = "http://127.0.0.1:8000/health_check";
 
 #[tokio::test]
 async fn health_check_expect_status_200_test() {
-    // Arrange 
-    spawn_app().await.expect(SPAWN_APP_ERR);
+    // Arrange
+    spawn_app();
     let client = reqwest::Client::new();
 
     // Act
@@ -23,7 +24,7 @@ async fn health_check_expect_status_200_test() {
 #[tokio::test]
 async fn health_check_expect_content_length_0_test() {
     // Arrange
-    spawn_app().await.expect(SPAWN_APP_ERR);
+    spawn_app();
     let client = reqwest::Client::new();
 
     // Act
@@ -37,6 +38,9 @@ async fn health_check_expect_content_length_0_test() {
     assert_eq!(Some(0), response.content_length());
 }
 
-async fn spawn_app() -> Result<(), std::io::Error> {
-    todo!()
+fn spawn_app() {
+    let listener = TcpListener::bind("127.0.0.1:8000").expect("Failed to create tcp listener.");
+    let server = zero2prod::run(listener).expect("Failed to bind address.");
+
+    let _ = tokio::spawn(server);
 }
