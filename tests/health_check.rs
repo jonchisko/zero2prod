@@ -34,7 +34,7 @@ async fn subscribe_returns_a_200_for_valid_form_data_test() {
         .body(body)
         .send()
         .await
-        .expect("failed to execute request.");
+        .expect(RESPONSE_ERR);
 
     // Assert
     assert_eq!(200, response.status().as_u16());
@@ -59,7 +59,7 @@ async fn subscribe_returns_a_400_when_data_is_missing() {
             .body(invalid_body)
             .send()
             .await
-            .expect("Failed to execute request.");
+            .expect(RESPONSE_ERR);
 
         // Assert
         assert_eq!(
