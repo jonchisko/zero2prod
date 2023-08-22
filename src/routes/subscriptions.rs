@@ -10,7 +10,7 @@ pub struct FormData {
 }
 
 #[tracing::instrument(
-    name = "adding a new subscriber",
+    name = "Adding a new subscriber",
     skip(form, pool),
     fields(
         subscriber_email = %form.email,
