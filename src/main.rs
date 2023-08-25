@@ -1,7 +1,11 @@
 use std::net::TcpListener;
 
 use sqlx::postgres::PgPoolOptions;
-use zero2prod::{configuration::get_configuration, startup, telemetry};
+use zero2prod::{
+    configuration::get_configuration,
+    email_client::{self, EmailClient},
+    startup, telemetry,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
@@ -13,9 +17,15 @@ async fn main() -> Result<(), std::io::Error> {
         .acquire_timeout(std::time::Duration::from_secs(2))
         .connect_lazy_with(configuration.database.with_db());
 
+    let sender_email = configuration
+        .email_client
+        .sender()
+        .expect("Invalid sender emai address.");
+    let email_client = EmailClient::new(sender_email, configuration.email_client.base_url);
+
     let listener = TcpListener::bind(format!(
         "{}:{}",
         configuration.application.host, configuration.application.port
     ))?;
-    startup::run(listener, connection_pool)?.await
+    startup::run(listener, connection_pool, email_client)?.await
 }
