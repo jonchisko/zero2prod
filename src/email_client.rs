@@ -21,7 +21,7 @@ impl EmailClient {
 
         Self {
             sender,
-            http_client: http_client,
+            http_client,
             base_url,
             authorization_token,
         }
@@ -39,7 +39,7 @@ impl EmailClient {
         let request_body = SendEmailRequest {
             from: self.sender.as_ref(),
             to: recipent.as_ref(),
-            subject: subject,
+            subject,
             html_body: html_content,
             text_body: text_content,
         };
