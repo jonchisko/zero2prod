@@ -4,4 +4,4 @@ database:
   require_ssl: true
 email_client:
   base_url: "https://api.postmarkapp.com"
-  sender_email:" js5891@student.uni-lj.si"
+  sender_email: "js5891@student.uni-lj.si"
