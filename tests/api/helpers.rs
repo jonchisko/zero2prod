@@ -7,6 +7,8 @@ use zero2prod::{
     telemetry::{get_subscriber, init_subscriber},
 };
 
+use wiremock::MockServer;
+
 pub const RESPONSE_ERR: &'static str = "Failed to execute request.";
 
 static TRACING: Lazy<()> = Lazy::new(|| {
@@ -25,6 +27,7 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
+    pub email_server: MockServer,
 }
 
 impl TestApp {
@@ -42,12 +45,17 @@ impl TestApp {
 pub async fn spawn_app() -> TestApp {
     Lazy::force(&TRACING);
 
+    // Launch a mock server to stand in for Postmark's API
+    let email_server = MockServer::start().await;
+
     let configuration = {
         // use a different db for each test case
         let mut c = configuration::get_configuration().expect("Failed to read configuration.");
         c.database.database_name = Uuid::new_v4().to_string();
         // random port
         c.application.port = 0;
+        // Use the mock server as email API
+        c.email_client.base_url = email_server.uri();
         c
     };
 
@@ -61,6 +69,7 @@ pub async fn spawn_app() -> TestApp {
     TestApp {
         address,
         db_pool: get_connection_pool(&configuration.database),
+        email_server,
     }
 }
 
